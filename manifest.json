@@ -1,0 +1,8 @@
+{
+  "domain": "almere_afval",
+  "name": "Almere Afval Kalender",
+  "documentation": "https://github.com/sahulkrishan/custom-components_almere-afval/blob/master/README.md",
+  "dependencies": [],
+  "codeowners": [],
+  "requirements": []
+}

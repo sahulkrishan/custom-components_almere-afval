@@ -1,13 +1,13 @@
 """
-Support for reading trash pickup data for Twente Milieu.
+Support for reading trash pickup data for Almere Afval.
 
 configuration.yaml
 
 sensor:
-  - platform: twentemilieu
-    postcode: 
-    huisnummer: 
-    toevoeging: 
+  - platform: almere_afval
+    postcode:
+    huisnummer:
+    toevoeging:
     resources:
       - GREEN
       - PACKAGES
@@ -32,8 +32,8 @@ _LOGGER = logging.getLogger(__name__)
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(hours=12)
 
-DEFAULT_NAME = 'Twente Milieu'
-DEFAULT_COMPANY = '8d97bb56-5afd-4cbc-a651-b4f7314264b4'
+DEFAULT_NAME = 'Almere Afval'
+DEFAULT_COMPANY = '53d8db94-7945-42fd-9742-9bbc71dbe4c1'
 DEFAULT_STARTDATE = datetime.today()
 DEFUALT_ENDDATE = datetime.today() + timedelta(weeks=5)
 CONST_POSTCODE = 'postcode'
@@ -43,9 +43,10 @@ CONST_TOEVOEGING = 'toevoeging'
 # Predefined types and id's
 TRASH_TYPES = {
     'GREEN': ['GFT', 'mdi:delete-empty'],
-    'PACKAGES': ['Plastic en Verpakking', 'mdi:delete-empty'],
-    'PAPER': ['Papier', 'mdi:delete-empty'],
+    'PACKAGES': ['Plastic en Verpakking', 'mdi:recycle'],
+    'PAPER': ['Papier', 'mdi:file'],
     'GREY': ['Restafval', 'mdi:delete-empty'],
+    'GREENGREY': ['GFT en Restafval', 'mdi:delete-empty'],
 }
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
@@ -58,7 +59,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 })
 
 def setup_platform(hass, config, add_entities, discovery_info=None):
-    """Setup the Twente Milieu sensors."""
+    """Setup the Almere Afval sensors."""
     postcode = config.get(CONST_POSTCODE)
     huisnummer = config.get(CONST_HUISNUMMER)
     toevoeging = config.get(CONST_TOEVOEGING)
@@ -76,7 +77,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     entities = []
     for resource in config[CONF_RESOURCES]:
         trash_type = resource
-        
+
         entities.append(TrashSensor(data, name, trash_type))
     add_entities(entities, True)
 
@@ -104,7 +105,7 @@ class TrashData(object):
               "houseLetter": self._toevoeging
             }).json()
             _LOGGER.debug("Get Unique Adress ID = %s", json_data)
-            self._addressid = json_data['dataList'][0]['AddressUniqueId']
+            self._addressid = json_data['dataList'][0]['UniqueId']
             _LOGGER.debug("Parsed addressid = %s", self._addressid)
         except requests.exceptions.RequestException:
             _LOGGER.error("Cannot fetch the addressid %s.", err.args)
@@ -113,7 +114,7 @@ class TrashData(object):
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self):
-        """Get the twentemilieu calendar data."""
+        """Get the Almere Afval calendar data."""
         trashschedule = []
         try:
             json_data = requests.post("https://wasteapi.2go-mobile.com/api/GetCalendar", data = {
@@ -122,13 +123,13 @@ class TrashData(object):
               "startDate": self._startdate,
               "endDate": self._enddate
             }).json()
-            _LOGGER.debug("Get twentemilieu calendar data = %s", json_data)
+            _LOGGER.debug("Get Almere Afval calendar data = %s", json_data)
         except requests.exceptions.RequestException:
             _LOGGER.error("Cannot fetch calendar data %s.", err.args)
             self.data = None
             return False
 
-        """Parse the twentemilieu data."""
+        """Parse the Almere Afval data."""
         try:
             for afval in json_data['dataList']:
                if len(afval['pickupDates']) != 0:
@@ -169,7 +170,7 @@ class TrashSensor(Entity):
     def icon(self):
         """Icon to use in the frontend, if any."""
         return self._icon
-    
+
     @property
     def device_class(self):
         """Return the class of this sensor."""

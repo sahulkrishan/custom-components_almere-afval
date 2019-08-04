@@ -1,4 +1,4 @@
-# twentemilieu
-Twentemilieu garbage collection sensor for Home Assistant
+# Almere Afval
+Almere Afval garbage collection sensor for Home Assistant
 
-This is a test setup for my sensor.
+Fully based on the custom component 'twentemilieu' https://github.com/yniezink/twentemilieu, adapted for Gemeente Almere Afval
